@@ -90,3 +90,28 @@ def generate(size):
 
     return size, cages
 
+def get_domains(size, cages):
+    domains = {}
+    def qualifies(values):
+        return not conflicting(members, values, members, values) and satisfies(values, operation(operator), target)
+
+    for cage in cages:
+        members, operator, target = cage
+        domains[members] = list(product(range(1, size + 1), repeat=len(members)))
+        domains[members] = list(filter(qualifies, domains[members]))
+
+    return domains
+
+def get_neighbours(cages):
+    neighbors = {}
+    for members, _, _ in cages:
+        neighbors[members] = []
+
+    for A, _, _ in cages:
+        for B, _, _ in cages:
+            if A != B and B not in neighbors[A]:
+                if conflicting(A, [-1] * len(A), B, [-1] * len(B)):
+                    neighbors[A].append(B)
+                    neighbors[B].append(A)
+
+    return neighbors
