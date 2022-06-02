@@ -115,3 +115,19 @@ def get_neighbours(cages):
                     neighbors[B].append(A)
 
     return neighbors
+
+#check if two cells in same rows or columns have the same value
+def conflicting(A, a, B, b):
+    for i in range(len(A)):
+        for j in range(len(B)):
+            if (A[i][0] == B[j][0]) != (A[i][1] == B[j][1]) and a[i] == b[j]:
+                return True
+    return False
+
+def satisfies(values, operation, target):
+    for p in permutations(values):
+        if reduce(operation, p) == target:
+            return True
+    return False
+
+
