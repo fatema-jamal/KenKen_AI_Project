@@ -130,4 +130,36 @@ def satisfies(values, operation, target):
             return True
     return False
 
+class Kenken(csp.CSP):
+    
+    def __init__(self, size, cages):
 
+        #get cells
+        variables=[]
+        for members,_, _ in cages:
+            variables.append(members)
+        #get domains
+        domains = get_domains(size, cages)
+
+        neighbors = get_neighbours(cages)
+
+        csp.CSP.__init__(self, variables, domains, neighbors, self.constraint)
+
+        self.size = size
+
+
+
+
+    def constraint(self, A, a, B, b):
+        self.checks += 1
+
+        return A == B or not conflicting(A, a, B, b)
+
+
+       
+if __name__ == "__main__":
+    size1,test = generate(6)
+
+    ken3 = Kenken(size1, test)
+    assignment3 = csp.backtracking_search(ken3, inference=csp.mac)
+  
