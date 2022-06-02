@@ -118,3 +118,156 @@ class Ui_MainWindow(object):
 
         sizes, cliques = ken.generate(size)
         self.board = ken.Kenken(sizes, cliques)
+                cages = cliques
+
+        self.globalcage=cages
+
+        cage_list = []
+        for cage in cages:
+            cage_x = []
+            cage_y = []
+
+            color = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+            for point in cage[0]:
+                cage_x.append(point[0])
+                cage_y.append(point[1])
+
+
+            cage_list.append({"name": str(cage[1]) + str(cage[2]), "color": color, "x": cage_x, "y": cage_y})
+
+        # points = {}
+        # for indx in range(len(val)):
+        #     points[(xcord[indx], ycord[indx])] = val[indx]
+
+        for cage in cage_list:
+
+            flag = 0
+            for indx in range(len(cage["x"])):
+                coord = (cage["x"][indx], cage["y"][indx])
+                if flag == 0:
+
+                    self.tableWidget.setItem((cage["x"][indx] - 1), (cage["y"][indx] - 1),QTableWidgetItem(cage["name"] + "     " ))
+                    self.tableWidget.item((cage["x"][indx] - 1), (cage["y"][indx] - 1)).setBackground(
+                        QtGui.QColor(cage["color"][0], cage["color"][1], cage["color"][2]))
+                    flag = 1
+                else:
+                    self.tableWidget.setItem((cage["x"][indx] - 1), (cage["y"][indx] - 1),QTableWidgetItem())
+                    self.tableWidget.item((cage["x"][indx] - 1), (cage["y"][indx] - 1)).setBackground(
+                        QtGui.QColor(cage["color"][0], cage["color"][1], cage["color"][2]))
+        self.cagelist=cage_list
+        # self.pointss=points
+
+
+        self.tableWidget.resizeColumnsToContents()
+
+    def Solve(self):
+
+        size = int(self.lineEdit.text())
+
+        self.tableWidget.setColumnCount(size)
+        self.tableWidget.setRowCount(size)
+        #
+        # sizes, cliques = ken.generate(size)
+        # board = ken.Kenken(sizes, cliques)
+
+        if self.radioButton.isChecked():
+            dt = time()
+
+            assignment = csp.backtracking_search(self.board)
+
+            dt = time() - dt
+
+            self.logs += "Backtracking search algorithm time taken is " + str(dt) + "\n"
+
+        if self.radioButton_2.isChecked():
+            dt = time()
+
+            assignment = csp.backtracking_search(self.board, inference=csp.forward_checking)
+
+            dt = time() - dt
+
+            self.logs += "Backtracking search with forward checking algorithm time taken is " + str(dt) + "\n"
+
+        if self.radioButton_3.isChecked():
+            dt = time()
+
+            assignment = csp.backtracking_search(self.board, inference=csp.mac)
+
+            dt = time() - dt
+
+            self.logs += "Backtracking search with arc consistency algorithm time taken is " + str(dt) + "\n"
+
+        d = assignment
+
+        # board.display(assignment)
+
+        keys = list(assignment.keys())
+        xcord = []
+        ycord = []
+        val = []
+        for key in keys:
+            for point in key:
+                xcord.append(point[0])
+                ycord.append(point[1])
+            values = assignment[key]
+            for value in values:
+                val.append(value)
+
+        cages = self.globalcage
+
+        cage_list = []
+        for cage in cages:
+            cage_x = []
+            cage_y = []
+
+            color = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+            for point in cage[0]:
+                cage_x.append(point[0])
+                cage_y.append(point[1])
+
+            cage_list.append({"name": str(cage[1]) + str(cage[2]), "color": color, "x": cage_x, "y": cage_y})
+
+        points = {}
+        for indx in range(len(val)):
+            points[(xcord[indx], ycord[indx])] = val[indx]
+
+
+
+
+        for cage in cage_list:
+
+            flag=0
+            for indx in range(len(cage["x"])):
+                coord=(cage["x"][indx], cage["y"][indx])
+                if flag == 0:
+
+                    self.tableWidget.setItem((cage["x"][indx]-1), (cage["y"][indx]-1),QTableWidgetItem("("+cage["name"]+")"+"   "+str(points[coord])))
+                    self.tableWidget.item((cage["x"][indx]-1), (cage["y"][indx]-1)).setBackground(QtGui.QColor(cage["color"][0],cage["color"][1],cage["color"][2]))
+                    flag=1
+                else:
+                    self.tableWidget.setItem((cage["x"][indx] - 1), (cage["y"][indx] - 1),
+                                             QTableWidgetItem("  " + "     " + str(points[coord])))
+                    self.tableWidget.item((cage["x"][indx] - 1), (cage["y"][indx] - 1)).setBackground(
+                        QtGui.QColor(cage["color"][0], cage["color"][1], cage["color"][2]))
+
+        self.tableWidget.resizeColumnsToContents()
+
+    def clearlog(self):
+        self.logs=""
+        self.textEdit.setText(self.logs)
+
+    def bench(self):
+
+        self.textEdit.setText(self.logs)
+
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+  
