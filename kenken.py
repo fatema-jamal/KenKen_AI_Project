@@ -22,5 +22,71 @@ def operation(op):
         return lambda a, b: a / b
     else:
         return None
+def generate(size):  
+    #filling array in order
+    board1= [[0 for x in range(size)] for y in range(size)]
+    
+    for i in range(size):
+        for j in range(size):
+            board1[i][j]= ((i + j) % size) + 1
+    #shuffling board's rows
+    for k in range(size):
+        shuffle(board1)
+    #shuffling board's columns 
+    for c1 in range(size):
+        for c2 in range(size):
+            if random() > 0.4:
+                for r in range(size):
+                    board1[r][c1], board1[r][c2] = board1[r][c2], board1[r][c1]
 
+    board={}
+    for i in range(size):
+        for j in range(size):
+            board[(j+1, i+1)]= board1[i][j]
+    print('board',board)
+    #initialize uncaged with all coordiantes
+    uncaged = sorted(board.keys(), key=lambda var: var[1])
+    cages = []
+    while uncaged:
+        cages.append([])
+        #max size of cells in cage = 4
+        cage_size = randint(1, 4)
+        cell = uncaged[0]
+        uncaged.remove(cell)
+        cages[-1].append(cell)
+
+        for m in range(cage_size - 1):
+            adjs=[]
+            for other in uncaged:
+                if(adjacent(cell, other)):
+                    adjs.append(other)
+            if adjs:
+                cell = choice(adjs)
+            else: 
+                cell = None
+    
+            if not cell:
+                break
+
+            uncaged.remove(cell)
+
+            cages[-1].append(cell)
+
+        cage_size = len(cages[-1])
+        if cage_size == 1:
+            cell = cages[-1][0]
+            cages[-1] = ((cell, ), '.', board[cell])
+            continue
+        elif cage_size == 2:
+            fst, snd = cages[-1][0], cages[-1][1]
+            if board[fst] / board[snd] > 0 and not board[fst] % board[snd]:
+                operator = "/" # choice("+-*/")
+            else:
+                operator = "-" # choice("+-*")
+        else:
+            operator = choice("+*")
+        target = reduce(operation(operator), [board[cell] for cell in cages[-1]])
+        cages[-1] = (tuple(cages[-1]), operator, int(target))
+
+    return size, cages
 
